@@ -23,6 +23,10 @@ const imageSchema = new mongoose.Schema({
         required: true,
         enum: [
             'products',
+            'shirts',
+            'pants',
+            'shoes',
+            'accessories',
             'categories',
             'banners',
             'users',

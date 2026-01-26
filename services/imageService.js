@@ -17,20 +17,22 @@ const s3Client = new S3Client({
 });
 
 // Configure multer to store files temporarily on disk
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = 'uploads/';
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueId = uuidv4();
-        const extension = path.extname(file.originalname);
-        cb(null, `${uniqueId}${extension}`);
-    }
-});
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         const uploadDir = 'uploads/';
+//         if (!fs.existsSync(uploadDir)) {
+//             fs.mkdirSync(uploadDir, { recursive: true });
+//         }
+//         cb(null, uploadDir);
+//     },
+//     filename: function (req, file, cb) {
+//         const uniqueId = uuidv4();
+//         const extension = path.extname(file.originalname);
+//         cb(null, `${uniqueId}${extension}`);
+//     }
+// });
+
+const storage = multer.memoryStorage();
 
 // Create a custom file filter that accepts any file type for testing
 const acceptAllFiles = (req, file, cb) => {
@@ -87,7 +89,7 @@ export const handleMulterError = (error, req, res, next) => {
 // Enhanced upload middleware with better error handling
 export const uploadSingle = (fieldName = 'image') => {
     return (req, res, next) => {
-        console.log('RAW HEADERS:', req.headers['content-type']);
+
         upload.single(fieldName)(req, res, (err) => {
             if (err) {
                 return handleMulterError(err, req, res, next);
@@ -121,7 +123,8 @@ export const uploadToS3 = async (file, category, userId, metadata = {}) => {
         const uploadParams = {
             Bucket: process.env.AWS_S3_BUCKET_NAME,
             Key: key,
-            Body: fs.readFileSync(file.path),
+            // Body: fs.readFileSync(file.path),
+            Body: file.buffer,
             ContentType: file.mimetype,
             Metadata: {
                 originalname: file.originalname,
@@ -140,7 +143,7 @@ export const uploadToS3 = async (file, category, userId, metadata = {}) => {
 
         const location = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
-        fs.unlinkSync(file.path);
+        // fs.unlinkSync(file.path);
 
         return {
             success: true,
@@ -157,9 +160,9 @@ export const uploadToS3 = async (file, category, userId, metadata = {}) => {
     } catch (error) {
         console.error('S3 Upload Error:', error);
 
-        if (file?.path && fs.existsSync(file.path)) {
-            fs.unlinkSync(file.path);
-        }
+        // if (file?.path && fs.existsSync(file.path)) {
+        //     fs.unlinkSync(file.path);
+        // }
 
         return {
             success: false,
