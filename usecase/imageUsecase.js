@@ -25,6 +25,8 @@ class ImageUsecase {
             const imageData = {
                 name: metadata.name || file.originalname.split('.')[0],
                 description: metadata.description || '',
+                size: metadata?.size || 'm',
+                price: metadata?.price || 0,
                 url: uploadResult.data.location,
                 s3Key: uploadResult.data.key,
                 category: category,
@@ -66,7 +68,7 @@ class ImageUsecase {
         }
     }
 
-   
+
     async uploadMultipleImages(files, category, userId, metadataArray = []) {
         try {
             console.log(`Starting multiple upload: ${files.length} files for category: ${category}`);
@@ -557,7 +559,7 @@ class ImageUsecase {
         }
     }
 
-    
+
     async getImagesByTags(tags, options = {}) {
         try {
             const { page = 1, limit = 20 } = options;
@@ -628,6 +630,39 @@ class ImageUsecase {
             return {
                 success: false,
                 error: error.message || 'Failed to get latest images'
+            };
+        }
+    }
+
+    async getAllCategories() {
+        try {
+            const categories = await this.imageRepository.getAllCategories();
+
+            // If no categories, return defaults
+            if (!categories || categories.length === 0) {
+                return {
+                    success: true,
+                    data: [
+                        { name: 'Products', slug: 'products', count: 0 },
+                        { name: 'Categories', slug: 'categories', count: 0 },
+                        { name: 'Banners', slug: 'banners', count: 0 },
+                        { name: 'Users', slug: 'users', count: 0 },
+                        { name: 'Brands', slug: 'brands', count: 0 },
+                        { name: 'Reviews', slug: 'reviews', count: 0 },
+                        { name: 'General', slug: 'general', count: 0 }
+                    ]
+                };
+            }
+
+            return {
+                success: true,
+                data: categories
+            };
+        } catch (error) {
+            console.error('Get Categories Usecase Error:', error);
+            return {
+                success: false,
+                error: error.message
             };
         }
     }

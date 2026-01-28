@@ -10,6 +10,21 @@ const imageSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    size: {
+        type: String,
+        required: true,
+        enum: [
+            's',
+            'm',
+            'l',
+            'xl',
+            'xxl'
+        ]
+    },
+    price: {
+        type: Number,
+        required: true
+    },
     url: {
         type: String,
         required: true

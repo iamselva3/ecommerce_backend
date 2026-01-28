@@ -4,12 +4,14 @@ import dotenv from 'dotenv';
 import { connectDB } from './db.js';
 import userRoutes from './routes/userroutes.js';
 import imageRoutes from './routes/imageRoute.js';
+import cors from 'cors';
+
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-
+app.use(cors());
 
 connectDB();
 

@@ -23,10 +23,11 @@ class ImageController {
                 const category = req.params.category || 'general';
                 const userId = req.user?.userId;
 
-                // Prepare metadata
                 const metadata = {
                     name: req.body.name || req.file.originalname.split('.')[0],
                     altText: req.body.altText || '',
+                    size: req.body.size || 'm',
+                    price: req.body.price || 0,
                     tags: req.body.tags ? req.body.tags.split(',').map(tag => tag.trim()) : [],
                     isFeatured: req.body.isFeatured === 'true',
                     description: req.body.description || '',
@@ -66,7 +67,8 @@ class ImageController {
     ];
 
     uploadMultipleImages = [
-        upload.array('images', 10),
+        // upload.array('images', 10),
+        handleMulterError,
         async (req, res) => {
             try {
                 if (!req.files || req.files.length === 0) {
@@ -119,7 +121,7 @@ class ImageController {
         }
     ];
 
-    // ==================== GET IMAGES BY CATEGORY ====================
+
     getImagesByCategory = async (req, res) => {
         try {
             const { category } = req.params;
@@ -585,6 +587,32 @@ class ImageController {
             }
         }
     ];
+
+  
+getAllCategories = async (req, res) => {
+  try {
+    const result = await this.imageUsecase.getAllCategories();
+    
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        data: result.data
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Get Categories Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
 }
 
 export default ImageController;

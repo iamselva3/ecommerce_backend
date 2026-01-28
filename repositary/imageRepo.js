@@ -281,6 +281,43 @@ class ImageRepository {
             throw error;
         }
     }
+
+
+    async getAllCategories() {
+        try {
+            const categories = await Image.aggregate([
+                {
+                    $match: { isActive: true }
+                },
+                {
+                    $group: {
+                        _id: "$category",
+                        count: { $sum: 1 },
+                        image: { $first: "$url" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        slug: "$_id",
+                        name: {
+                            $concat: [
+                                { $toUpper: { $substrCP: ["$_id", 0, 1] } },
+                                { $substrCP: ["$_id", 1, { $strLenCP: "$_id" }] }
+                            ]
+                        },
+                        count: 1,
+                        image: 1
+                    }
+                }
+            ]);
+
+            return categories;
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
 
 export default ImageRepository;
