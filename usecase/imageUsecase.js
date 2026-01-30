@@ -25,7 +25,7 @@ class ImageUsecase {
             const imageData = {
                 name: metadata.name || file.originalname.split('.')[0],
                 description: metadata.description || '',
-                size: metadata?.size || 'm',
+                sizes: metadata?.sizes || ['m'],
                 price: metadata?.price || 0,
                 url: uploadResult.data.location,
                 s3Key: uploadResult.data.key,
@@ -483,7 +483,6 @@ class ImageUsecase {
         }
     }
 
-    // ==================== GET FEATURED IMAGES ====================
     async getFeaturedImages(category = null, limit = 10) {
         try {
             const images = await this.imageRepository.getFeaturedImages(category, limit);

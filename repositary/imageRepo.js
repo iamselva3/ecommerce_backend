@@ -214,7 +214,6 @@ class ImageRepository {
         }
     }
 
-    // Get featured images
     async getFeaturedImages(category = null, limit = 10) {
         try {
             const query = {

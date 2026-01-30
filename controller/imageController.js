@@ -23,10 +23,18 @@ class ImageController {
                 const category = req.params.category || 'general';
                 const userId = req.user?.userId;
 
+                let sizes = [];
+
+                try {
+                    sizes = JSON.parse(req.body.sizes);
+                } catch (err) {
+                    return res.status(400).json({ message: "Invalid sizes format" });
+                }
+
                 const metadata = {
                     name: req.body.name || req.file.originalname.split('.')[0],
                     altText: req.body.altText || '',
-                    size: req.body.size || 'm',
+                    sizes: sizes,
                     price: req.body.price || 0,
                     tags: req.body.tags ? req.body.tags.split(',').map(tag => tag.trim()) : [],
                     isFeatured: req.body.isFeatured === 'true',
@@ -410,7 +418,7 @@ class ImageController {
         }
     };
 
-    // ==================== GET FEATURED IMAGES ====================
+
     getFeaturedImages = async (req, res) => {
         try {
             const { category, limit = 10 } = req.query;
@@ -588,31 +596,31 @@ class ImageController {
         }
     ];
 
-  
-getAllCategories = async (req, res) => {
-  try {
-    const result = await this.imageUsecase.getAllCategories();
-    
-    if (result.success) {
-      res.status(200).json({
-        success: true,
-        data: result.data
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: result.error
-      });
-    }
-  } catch (error) {
-    console.error('Get Categories Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
+
+    getAllCategories = async (req, res) => {
+        try {
+            const result = await this.imageUsecase.getAllCategories();
+
+            if (result.success) {
+                res.status(200).json({
+                    success: true,
+                    data: result.data
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: result.error
+                });
+            }
+        } catch (error) {
+            console.error('Get Categories Error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Server error',
+                error: error.message
+            });
+        }
+    };
 }
 
 export default ImageController;
