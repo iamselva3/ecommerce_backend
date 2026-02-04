@@ -177,7 +177,7 @@ class ImageController {
         }
     };
 
-    // ==================== GET IMAGE BY ID ====================
+
     getImageById = async (req, res) => {
         try {
             const { id } = req.params;
@@ -205,12 +205,31 @@ class ImageController {
         }
     };
 
-    // ==================== UPDATE IMAGE ====================
+
     updateImage = async (req, res) => {
         try {
             const { id } = req.params;
             const userId = req.user?.userId;
             const userRole = req.user?.role;
+
+            console.log("req.body", req.body)
+
+            if (req.body.sizes !== undefined) {
+                // Case 1: multipart/form-data → string
+                if (typeof req.body.sizes === "string") {
+                    try {
+                        req.body.sizes = JSON.parse(req.body.sizes);
+                    } catch {
+                        return res.status(400).json({ message: "Invalid sizes format" });
+                    }
+                }
+
+                // Case 2: must be an array
+                if (!Array.isArray(req.body.sizes)) {
+                    return res.status(400).json({ message: "Sizes must be an array" });
+                }
+            }
+
 
             const result = await this.imageUsecase.updateImage(
                 id,
@@ -241,7 +260,7 @@ class ImageController {
         }
     };
 
-    // ==================== DELETE IMAGE ====================
+
     deleteImage = async (req, res) => {
         try {
             const { id } = req.params;
@@ -271,7 +290,7 @@ class ImageController {
         }
     };
 
-    // ==================== DELETE IMAGES BY CATEGORY ====================
+
     deleteImagesByCategory = async (req, res) => {
         try {
             const { category } = req.params;
@@ -308,7 +327,7 @@ class ImageController {
         }
     };
 
-    // ==================== SEARCH IMAGES ====================
+
     searchImages = async (req, res) => {
         try {
             const { q, category, page = 1, limit = 20 } = req.query;
@@ -337,7 +356,7 @@ class ImageController {
         }
     };
 
-    // ==================== UPDATE SORT ORDER ====================
+
     updateSortOrder = async (req, res) => {
         try {
             const userRole = req.user?.role;
@@ -377,7 +396,7 @@ class ImageController {
         }
     };
 
-    // ==================== TOGGLE FEATURED ====================
+
     toggleFeatured = async (req, res) => {
         try {
             const { id } = req.params;
@@ -447,7 +466,7 @@ class ImageController {
         }
     };
 
-    // ==================== GET STATISTICS ====================
+
     getImageStats = async (req, res) => {
         try {
             const userRole = req.user?.role;
@@ -476,7 +495,7 @@ class ImageController {
         }
     };
 
-    // ==================== GET IMAGES BY TAGS ====================
+
     getImagesByTags = async (req, res) => {
         try {
             const { tags, page = 1, limit = 20 } = req.query;
@@ -513,7 +532,7 @@ class ImageController {
         }
     };
 
-    // ==================== GET LATEST IMAGES ====================
+
     getLatestImages = async (req, res) => {
         try {
             const { limit = 10 } = req.query;
@@ -542,7 +561,7 @@ class ImageController {
         }
     };
 
-    // ==================== TEST UPLOAD (NO AUTH) ====================
+
     testUpload = [
         upload.single('image'),
         async (req, res) => {

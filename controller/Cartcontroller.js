@@ -5,6 +5,7 @@ const cartUseCase = new CartUseCase(new CartRepository());
 
 class CartController {
     async addToCart(req, res) {
+        console.log(req.body)
         const userId = req.user.userId;
         const cart = await cartUseCase.addItem(userId, req.body);
         res.json(cart);

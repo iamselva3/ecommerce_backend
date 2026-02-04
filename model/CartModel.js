@@ -8,7 +8,11 @@ const cartItemSchema = new mongoose.Schema({
     },
     name: String,
     price: Number,
-    size: String,
+    sizes: {
+        type: [String],
+        required: true,
+        enum: ['s', 'm', 'l', 'xl', 'xxl'],
+    },
     image: String,
     qty: {
         type: Number,

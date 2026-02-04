@@ -203,8 +203,8 @@ class ImageUsecase {
         }
     }
 
-    // ==================== UPDATE IMAGE ====================
     async updateImage(id, updateData, userId, userRole) {
+
         try {
             // Check if image exists
             const existingImage = await this.imageRepository.findById(id);
@@ -224,8 +224,8 @@ class ImageUsecase {
             }
 
             // Prepare update data (only allowed fields for non-admins)
-            const allowedFields = ['name', 'description', 'altText', 'tags', 'subCategory', 'sortOrder'];
-            const adminOnlyFields = ['isFeatured', 'category'];
+            const allowedFields = ['name', 'description', 'price', 'sizes', 'altText', 'tags', 'subCategory', 'sortOrder'];
+            const adminOnlyFields = ['isFeatured', 'category', 'sizes', 'price', 'name', 'description'];
 
             const finalUpdateData = {};
 
@@ -245,6 +245,7 @@ class ImageUsecase {
                 });
             }
 
+            
             // Update image
             const updatedImage = await this.imageRepository.update(id, finalUpdateData);
 
@@ -263,7 +264,7 @@ class ImageUsecase {
         }
     }
 
-    // ==================== DELETE IMAGE ====================
+
     async deleteImage(id, userId, userRole) {
         try {
             // Check if image exists
