@@ -35,7 +35,7 @@ router.post(
     orderController.cancelOrder
 );
 
-// ==================== ADMIN ROUTES ====================
+
 // Get all orders
 router.get(
     '/',
@@ -82,5 +82,7 @@ router.get(
     adminMiddleware,
     orderController.getRecentOrders
 );
+
+
 
 export default router;

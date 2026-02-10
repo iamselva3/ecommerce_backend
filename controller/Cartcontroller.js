@@ -36,6 +36,15 @@ class CartController {
         await cartUseCase.clearCart(req.user.userId);
         res.json({ success: true });
     }
+    
+    async getCartCount(req, res) {
+        const userId = req.user.userId;
+        const count = await cartUseCase.getCartCount(userId);
+        res.json(count);
+    }
 }
+
+
+
 
 export default new CartController();

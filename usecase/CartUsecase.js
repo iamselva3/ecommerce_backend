@@ -52,6 +52,23 @@ class CartUseCase {
     async clearCart(userId) {
         return this.cartRepository.deleteByUserId(userId);
     }
+
+    async getCartCount(userId) {
+        try {
+            const count = await this.cartRepository.getCartCount(userId);
+            return {
+                success: true,
+                count: count
+            };
+        } catch (error) {
+            console.error('Get cart count error:', error);
+            return {
+                success: false,
+                error: 'Failed to get cart count'
+            };
+        }
+    }
 }
+
 
 export default CartUseCase;

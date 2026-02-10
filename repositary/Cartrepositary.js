@@ -42,6 +42,22 @@ class CartRepository {
             throw error;
         }
     }
+
+    async getCartCount(userId) {
+        try {
+            const cart = await Cart.findOne({ userId: userId });
+            
+            if (!cart || !cart.items || cart.items.length === 0) {
+                return 0;
+            }
+            
+            // Sum up all quantities
+            return cart.items.reduce((sum, item) => sum + (item.qty || 1), 0);
+        } catch (error) {
+            console.error('Get cart count error:', error);
+            throw error;
+        }
+    }
 }
 
 export default CartRepository;
