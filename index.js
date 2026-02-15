@@ -7,6 +7,7 @@ import imageRoutes from './routes/imageRoute.js';
 import cartRoutes from './routes/CartRoute.js';
 import orderRoutes from './routes/OrderRoutes.js';
 import reviewRoutes from './routes/reviewRoute.js';
+import wishlistRoutes from './routes/wishlistRoute.js';
 import cors from 'cors';
 
 
@@ -45,6 +46,7 @@ app.use('/api/images', imageRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
