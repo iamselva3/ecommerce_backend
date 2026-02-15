@@ -292,10 +292,11 @@ class ImageRepository {
                     $group: {
                         _id: "$category",
                         count: { $sum: 1 },
-                        image: { $first: "$url" }
+                        // image: { $first: "$url" }
+                        image: { $first: { $arrayElemAt: ["$images.url", 0] } }
                     }
                 },
-                {
+                {   
                     $project: {
                         _id: 0,
                         slug: "$_id",

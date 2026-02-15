@@ -86,18 +86,24 @@ class ImageController {
                     });
                 }
 
+
                 const category = req.params.category || 'general';
                 const userId = req.user?.userId;
 
                 // Parse metadata array
                 let metadataArray = [];
+
                 try {
-                    if (req.body.images) {
-                        metadataArray = JSON.parse(req.body.images);
+                    if (req.body.metadata) {
+                        const parsed = JSON.parse(req.body.metadata);
+                        metadataArray = [parsed];
+                    } else {
+                        metadataArray = [req.body];
                     }
                 } catch (e) {
-                    metadataArray = [];
+                    metadataArray = [{}];
                 }
+
 
                 const result = await this.imageUsecase.uploadMultipleImages(
                     req.files,

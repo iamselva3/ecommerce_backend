@@ -23,7 +23,7 @@ class UserUsecase {
             const user = await this.userRepository.create(userData);
 
             // Generate JWT token
-            const token = this.generateToken(user._id, user.role);
+            const token = this.generateToken(user._id, user.role, user.name);
 
             return {
                 success: true,
@@ -60,7 +60,7 @@ class UserUsecase {
             }
 
             // Generate token
-            const token = this.generateToken(user._id, user.role);
+            const token = this.generateToken(user._id, user.role, user.name);
 
             return {
                 success: true,
@@ -124,7 +124,7 @@ class UserUsecase {
 
     async updateUser(id, updateData, currentUserId, currentUserRole) {
         try {
-            
+
             const existingUser = await this.userRepository.findById(id);
             if (!existingUser) {
                 throw new Error('User not found');
@@ -192,9 +192,9 @@ class UserUsecase {
         }
     }
 
-    generateToken(userId, role) {
+    generateToken(userId, role, name) {
         return jwt.sign(
-            { userId, role },
+            { userId, role, name },
             process.env.JWT_SECRET || 'your-secret-key',
             { expiresIn: process.env.JWT_EXPIRE || '7d' }
         );

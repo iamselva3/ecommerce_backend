@@ -68,46 +68,68 @@ class ImageUsecase {
         }
     }
 
-
     async uploadMultipleImages(files, category, userId, metadataArray = []) {
         try {
-            console.log(`Starting multiple upload: ${files.length} files for category: ${category}`);
+            // console.log(`Uploading product with ${files.length} images`);
 
-            const uploadPromises = files.map((file, index) => {
-                const metadata = metadataArray[index] || {
-                    name: file.originalname.split('.')[0],
-                    altText: '',
-                    tags: [],
-                    description: ''
+            const metadata = metadataArray[0] || {};
+            const imageUploads = [];
+
+            for (const file of files) {
+                const uploadResult = await uploadToS3(file, category, userId, metadata);
+
+                if (!uploadResult.success) continue;
+
+                imageUploads.push({
+                    url: uploadResult.data.location,
+                    s3Key: uploadResult.data.key,
+                    altText: metadata.altText || '',
+                    sortOrder: 0
+                });
+            }
+
+            if (imageUploads.length === 0) {
+                return {
+                    success: false,
+                    error: 'No images uploaded'
                 };
+            }
 
-                return this.uploadImage(file, category, userId, metadata);
-            });
+            const imageData = {
+                name: metadata.name || 'Product',
+                description: metadata.description || '',
+                sizes: metadata?.sizes || ['m'],
+                price: metadata?.price || 0,
+                images: imageUploads,
+                category,
+                subCategory: metadata.subCategory || null,
+                tags: metadata.tags || [],
+                uploadedBy: userId,
+                isFeatured: metadata.isFeatured || false,
+                metadata: {
+                    totalImages: imageUploads.length
+                }
+            };
 
-            const results = await Promise.all(uploadPromises);
-            const successful = results.filter(r => r.success);
-            const failed = results.filter(r => !r.success);
+            // return console.log(metadata.name, "dgysdysdyid");
+
+            const savedProduct = await this.imageRepository.create(imageData);
 
             return {
                 success: true,
-                data: {
-                    total: files.length,
-                    successful: successful.length,
-                    failed: failed.length,
-                    images: successful.map(r => r.data?.image),
-                    errors: failed.map(r => r.error)
-                }
+                data: savedProduct
             };
+
         } catch (error) {
-            console.error('Multiple Upload Usecase Error:', error);
+            console.error('Multiple Upload Error:', error);
             return {
                 success: false,
-                error: error.message || 'Failed to upload multiple images'
+                error: error.message
             };
         }
     }
 
-    // ==================== GET IMAGES BY CATEGORY ====================
+
     async getImagesByCategory(category, options = {}) {
         try {
             const {
@@ -144,15 +166,23 @@ class ImageUsecase {
             );
 
             // Generate signed URLs for each image
-            const imagesWithSignedUrls = await Promise.all(
-                result.images.map(async (image) => {
-                    const signedUrlResult = await getSignedUrl(image.s3Key, 3600);
-                    return {
-                        ...image.toObject(),
-                        signedUrl: signedUrlResult.success ? signedUrlResult.url : null
-                    };
-                })
-            );
+           const imagesWithSignedUrls = await Promise.all(
+    result.images.map(async (product) => {
+        const productObj = product.toObject();
+
+        if (productObj.images && productObj.images.length > 0) {
+            for (const img of productObj.images) {
+                if (img.s3Key) {
+                    const signed = await getSignedUrl(img.s3Key, 3600);
+                    img.signedUrl = signed.success ? signed.url : img.url;
+                }
+            }
+        }
+
+        return productObj;
+    })
+);
+
 
             return {
                 success: true,
@@ -183,17 +213,26 @@ class ImageUsecase {
             }
 
             // Generate signed URL
-            const signedUrlResult = await getSignedUrl(image.s3Key, 3600);
+            // const signedUrlResult = await getSignedUrl(image.s3Key, 3600);
+            const imageObj = image.toObject();
 
-            return {
-                success: true,
-                data: {
-                    image: {
-                        ...image.toObject(),
-                        signedUrl: signedUrlResult.success ? signedUrlResult.url : null
-                    }
-                }
-            };
+if (imageObj.images && imageObj.images.length > 0) {
+    for (const img of imageObj.images) {
+        if (img.s3Key) {
+            const signed = await getSignedUrl(img.s3Key, 3600);
+            img.signedUrl = signed.success ? signed.url : img.url;
+        }
+    }
+}
+
+
+           return {
+    success: true,
+    data: {
+        image: imageObj
+    }
+};
+
         } catch (error) {
             console.error('Get Image Usecase Error:', error);
             return {
@@ -245,7 +284,7 @@ class ImageUsecase {
                 });
             }
 
-            
+
             // Update image
             const updatedImage = await this.imageRepository.update(id, finalUpdateData);
 
@@ -602,7 +641,7 @@ class ImageUsecase {
         }
     }
 
-    // ==================== GET LATEST IMAGES ====================
+    
     async getLatestImages(limit = 10) {
         try {
             const images = await this.imageRepository.getLatestImages(limit);
@@ -638,19 +677,20 @@ class ImageUsecase {
         try {
             const categories = await this.imageRepository.getAllCategories();
 
-            // If no categories, return defaults
+         
             if (!categories || categories.length === 0) {
                 return {
-                    success: true,
-                    data: [
-                        { name: 'Products', slug: 'products', count: 0 },
-                        { name: 'Categories', slug: 'categories', count: 0 },
-                        { name: 'Banners', slug: 'banners', count: 0 },
-                        { name: 'Users', slug: 'users', count: 0 },
-                        { name: 'Brands', slug: 'brands', count: 0 },
-                        { name: 'Reviews', slug: 'reviews', count: 0 },
-                        { name: 'General', slug: 'general', count: 0 }
-                    ]
+                    success: false,
+                    // data: [
+                    //     { name: 'Products', slug: 'products', count: 0 },
+                    //     { name: 'Categories', slug: 'categories', count: 0 },
+                    //     { name: 'Banners', slug: 'banners', count: 0 },
+                    //     { name: 'Users', slug: 'users', count: 0 },
+                    //     { name: 'Brands', slug: 'brands', count: 0 },
+                    //     { name: 'Reviews', slug: 'reviews', count: 0 },
+                    //     { name: 'General', slug: 'general', count: 0 }
+                    // ]
+                    message: "No categories found"
                 };
             }
 

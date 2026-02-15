@@ -30,14 +30,14 @@ const imageSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    url: {
-        type: String,
-        required: true
-    },
-    s3Key: {
-        type: String,
-        required: true
-    },
+    // url: {
+    //     type: String,
+    //     required: true
+    // },
+    // s3Key: {
+    //     type: String,
+    //     required: true
+    // },
     category: {
         type: String,
         required: true,
@@ -57,14 +57,33 @@ const imageSchema = new mongoose.Schema({
         ],
         default: 'general'
     },
+
+       images: [{
+        url: {
+            type: String,
+            required: true
+        },
+        s3Key: {
+            type: String,
+            required: true
+        },
+        altText: {
+            type: String,
+            trim: true
+        },
+        sortOrder: {
+            type: Number,
+            default: 0
+        }
+    }],
     subCategory: {
         type: String,
         trim: true
     },
-    altText: {
-        type: String,
-        trim: true
-    },
+    // altText: {
+    //     type: String,
+    //     trim: true
+    // },
     tags: [{
         type: String,
         trim: true
@@ -78,10 +97,10 @@ const imageSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    sortOrder: {
-        type: Number,
-        default: 0
-    },
+    // sortOrder: {
+    //     type: Number,
+    //     default: 0
+    // },
     metadata: {
         type: mongoose.Schema.Types.Mixed,
         default: {}
