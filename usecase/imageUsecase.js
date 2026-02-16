@@ -6,6 +6,21 @@ class ImageUsecase {
         this.imageRepository = new ImageRepository();
     }
 
+    // Helper method to safely generate signed URLs
+    async generateSignedUrlSafe(s3Key, expiresIn = 3600) {
+        if (!s3Key || typeof s3Key !== 'string' || s3Key.trim() === '') {
+            console.warn('Invalid s3Key provided to generateSignedUrlSafe:', s3Key);
+            return null;
+        }
+
+        try {
+            const result = await getSignedUrl(s3Key.trim(), expiresIn);
+            return result.success ? result.url : null;
+        } catch (error) {
+            console.error(`Error generating signed URL for ${s3Key}:`, error.message);
+            return null;
+        }
+    }
 
     async uploadImage(file, category, userId, metadata = {}) {
         try {
@@ -48,14 +63,14 @@ class ImageUsecase {
             const savedImage = await this.imageRepository.create(imageData);
             console.log(`Image saved to database with ID: ${savedImage._id}`);
 
-            // Generate signed URL
-            const signedUrlResult = await getSignedUrl(uploadResult.data.key, 3600);
+            // Generate signed URL safely
+            const signedUrl = await this.generateSignedUrlSafe(uploadResult.data.key, 3600);
 
             return {
                 success: true,
                 data: {
                     image: savedImage,
-                    signedUrl: signedUrlResult.success ? signedUrlResult.url : null,
+                    signedUrl: signedUrl || uploadResult.data.location,
                     publicUrl: uploadResult.data.location
                 }
             };
@@ -70,8 +85,6 @@ class ImageUsecase {
 
     async uploadMultipleImages(files, category, userId, metadataArray = []) {
         try {
-            // console.log(`Uploading product with ${files.length} images`);
-
             const metadata = metadataArray[0] || {};
             const imageUploads = [];
 
@@ -111,8 +124,6 @@ class ImageUsecase {
                 }
             };
 
-            // return console.log(metadata.name, "dgysdysdyid");
-
             const savedProduct = await this.imageRepository.create(imageData);
 
             return {
@@ -128,7 +139,6 @@ class ImageUsecase {
             };
         }
     }
-
 
     async getImagesByCategory(category, options = {}) {
         try {
@@ -165,24 +175,25 @@ class ImageUsecase {
                 { page, limit, sort }
             );
 
-            // Generate signed URLs for each image
-           const imagesWithSignedUrls = await Promise.all(
-    result.images.map(async (product) => {
-        const productObj = product.toObject();
+            // Generate signed URLs safely for each image
+            const imagesWithSignedUrls = await Promise.all(
+                result.images.map(async (product) => {
+                    const productObj = product.toObject();
 
-        if (productObj.images && productObj.images.length > 0) {
-            for (const img of productObj.images) {
-                if (img.s3Key) {
-                    const signed = await getSignedUrl(img.s3Key, 3600);
-                    img.signedUrl = signed.success ? signed.url : img.url;
-                }
-            }
-        }
+                    if (productObj.images && productObj.images.length > 0) {
+                        for (const img of productObj.images) {
+                            if (img.s3Key && img.s3Key.trim() !== '') {
+                                const signedUrl = await this.generateSignedUrlSafe(img.s3Key, 3600);
+                                img.signedUrl = signedUrl || img.url;
+                            } else {
+                                img.signedUrl = img.url;
+                            }
+                        }
+                    }
 
-        return productObj;
-    })
-);
-
+                    return productObj;
+                })
+            );
 
             return {
                 success: true,
@@ -200,7 +211,6 @@ class ImageUsecase {
         }
     }
 
-    // ==================== GET IMAGE BY ID ====================
     async getImageById(id) {
         try {
             const image = await this.imageRepository.findById(id);
@@ -212,26 +222,25 @@ class ImageUsecase {
                 };
             }
 
-            // Generate signed URL
-            // const signedUrlResult = await getSignedUrl(image.s3Key, 3600);
             const imageObj = image.toObject();
 
-if (imageObj.images && imageObj.images.length > 0) {
-    for (const img of imageObj.images) {
-        if (img.s3Key) {
-            const signed = await getSignedUrl(img.s3Key, 3600);
-            img.signedUrl = signed.success ? signed.url : img.url;
-        }
-    }
-}
+            if (imageObj.images && imageObj.images.length > 0) {
+                for (const img of imageObj.images) {
+                    if (img.s3Key && img.s3Key.trim() !== '') {
+                        const signedUrl = await this.generateSignedUrlSafe(img.s3Key, 3600);
+                        img.signedUrl = signedUrl || img.url;
+                    } else {
+                        img.signedUrl = img.url;
+                    }
+                }
+            }
 
-
-           return {
-    success: true,
-    data: {
-        image: imageObj
-    }
-};
+            return {
+                success: true,
+                data: {
+                    image: imageObj
+                }
+            };
 
         } catch (error) {
             console.error('Get Image Usecase Error:', error);
@@ -243,7 +252,6 @@ if (imageObj.images && imageObj.images.length > 0) {
     }
 
     async updateImage(id, updateData, userId, userRole) {
-
         try {
             // Check if image exists
             const existingImage = await this.imageRepository.findById(id);
@@ -284,7 +292,6 @@ if (imageObj.images && imageObj.images.length > 0) {
                 });
             }
 
-
             // Update image
             const updatedImage = await this.imageRepository.update(id, finalUpdateData);
 
@@ -302,7 +309,6 @@ if (imageObj.images && imageObj.images.length > 0) {
             };
         }
     }
-
 
     async deleteImage(id, userId, userRole) {
         try {
@@ -323,11 +329,12 @@ if (imageObj.images && imageObj.images.length > 0) {
                 };
             }
 
-            // Delete from S3
-            const deleteResult = await deleteFromS3(image.s3Key);
-            if (!deleteResult.success) {
-                console.warn(`Failed to delete image from S3: ${image.s3Key}`);
-                // Continue with database deletion even if S3 fails
+            // Delete from S3 if s3Key exists
+            if (image.s3Key && image.s3Key.trim() !== '') {
+                const deleteResult = await deleteFromS3(image.s3Key);
+                if (!deleteResult.success) {
+                    console.warn(`Failed to delete image from S3: ${image.s3Key}`);
+                }
             }
 
             // Delete from database
@@ -346,7 +353,6 @@ if (imageObj.images && imageObj.images.length > 0) {
         }
     }
 
-    // ==================== DELETE IMAGES BY CATEGORY ====================
     async deleteImagesByCategory(category, userId, userRole) {
         try {
             // Only admin can delete all images in a category
@@ -372,8 +378,11 @@ if (imageObj.images && imageObj.images.length > 0) {
                 };
             }
 
-            // Delete each image from S3
-            const deletePromises = images.map(image => deleteFromS3(image.s3Key));
+            // Delete each image from S3 (only if s3Key exists)
+            const deletePromises = images
+                .filter(img => img.s3Key && img.s3Key.trim() !== '')
+                .map(image => deleteFromS3(image.s3Key));
+
             const deleteResults = await Promise.all(deletePromises);
             const successfulDeletes = deleteResults.filter(r => r.success).length;
 
@@ -398,7 +407,6 @@ if (imageObj.images && imageObj.images.length > 0) {
         }
     }
 
-    // ==================== SEARCH IMAGES ====================
     async searchImages(searchTerm, options = {}) {
         try {
             const { category, page = 1, limit = 20 } = options;
@@ -415,14 +423,23 @@ if (imageObj.images && imageObj.images.length > 0) {
                 { category, page, limit }
             );
 
-            // Generate signed URLs
+            // Generate signed URLs safely
             const imagesWithSignedUrls = await Promise.all(
                 result.images.map(async (image) => {
-                    const signedUrlResult = await getSignedUrl(image.s3Key, 3600);
-                    return {
-                        ...image.toObject(),
-                        signedUrl: signedUrlResult.success ? signedUrlResult.url : null
-                    };
+                    const imageObj = image.toObject();
+
+                    if (imageObj.images && imageObj.images.length > 0) {
+                        for (const img of imageObj.images) {
+                            if (img.s3Key && img.s3Key.trim() !== '') {
+                                const signedUrl = await this.generateSignedUrlSafe(img.s3Key, 3600);
+                                img.signedUrl = signedUrl || img.url;
+                            } else {
+                                img.signedUrl = img.url;
+                            }
+                        }
+                    }
+
+                    return imageObj;
                 })
             );
 
@@ -443,7 +460,6 @@ if (imageObj.images && imageObj.images.length > 0) {
         }
     }
 
-    // ==================== UPDATE SORT ORDER ====================
     async updateSortOrder(imagesWithOrder, userId, userRole) {
         try {
             // Only admin can update sort order
@@ -484,7 +500,6 @@ if (imageObj.images && imageObj.images.length > 0) {
         }
     }
 
-    // ==================== TOGGLE FEATURED STATUS ====================
     async toggleFeatured(id, userId, userRole) {
         try {
             // Only admin can toggle featured status
@@ -527,14 +542,23 @@ if (imageObj.images && imageObj.images.length > 0) {
         try {
             const images = await this.imageRepository.getFeaturedImages(category, limit);
 
-            // Generate signed URLs
+            // Generate signed URLs safely
             const imagesWithSignedUrls = await Promise.all(
                 images.map(async (image) => {
-                    const signedUrlResult = await getSignedUrl(image.s3Key, 3600);
-                    return {
-                        ...image.toObject(),
-                        signedUrl: signedUrlResult.success ? signedUrlResult.url : null
-                    };
+                    const imageObj = image.toObject();
+
+                    if (imageObj.images && imageObj.images.length > 0) {
+                        for (const img of imageObj.images) {
+                            if (img.s3Key && img.s3Key.trim() !== '') {
+                                const signedUrl = await this.generateSignedUrlSafe(img.s3Key, 3600);
+                                img.signedUrl = signedUrl || img.url;
+                            } else {
+                                img.signedUrl = img.url;
+                            }
+                        }
+                    }
+
+                    return imageObj;
                 })
             );
 
@@ -554,7 +578,6 @@ if (imageObj.images && imageObj.images.length > 0) {
         }
     }
 
-    // ==================== GET IMAGE STATISTICS ====================
     async getImageStats(userRole) {
         try {
             // Only admin can view statistics
@@ -598,7 +621,6 @@ if (imageObj.images && imageObj.images.length > 0) {
         }
     }
 
-
     async getImagesByTags(tags, options = {}) {
         try {
             const { page = 1, limit = 20 } = options;
@@ -613,14 +635,23 @@ if (imageObj.images && imageObj.images.length > 0) {
             const tagArray = Array.isArray(tags) ? tags : [tags];
             const result = await this.imageRepository.findByTags(tagArray, { page, limit });
 
-            // Generate signed URLs
+            // Generate signed URLs safely
             const imagesWithSignedUrls = await Promise.all(
                 result.images.map(async (image) => {
-                    const signedUrlResult = await getSignedUrl(image.s3Key, 3600);
-                    return {
-                        ...image.toObject(),
-                        signedUrl: signedUrlResult.success ? signedUrlResult.url : null
-                    };
+                    const imageObj = image.toObject();
+
+                    if (imageObj.images && imageObj.images.length > 0) {
+                        for (const img of imageObj.images) {
+                            if (img.s3Key && img.s3Key.trim() !== '') {
+                                const signedUrl = await this.generateSignedUrlSafe(img.s3Key, 3600);
+                                img.signedUrl = signedUrl || img.url;
+                            } else {
+                                img.signedUrl = img.url;
+                            }
+                        }
+                    }
+
+                    return imageObj;
                 })
             );
 
@@ -641,19 +672,27 @@ if (imageObj.images && imageObj.images.length > 0) {
         }
     }
 
-    
     async getLatestImages(limit = 10) {
         try {
             const images = await this.imageRepository.getLatestImages(limit);
 
-            // Generate signed URLs
+            // Generate signed URLs safely
             const imagesWithSignedUrls = await Promise.all(
                 images.map(async (image) => {
-                    const signedUrlResult = await getSignedUrl(image.s3Key, 3600);
-                    return {
-                        ...image.toObject(),
-                        signedUrl: signedUrlResult.success ? signedUrlResult.url : null
-                    };
+                    const imageObj = image.toObject();
+
+                    if (imageObj.images && imageObj.images.length > 0) {
+                        for (const img of imageObj.images) {
+                            if (img.s3Key && img.s3Key.trim() !== '') {
+                                const signedUrl = await this.generateSignedUrlSafe(img.s3Key, 3600);
+                                img.signedUrl = signedUrl || img.url;
+                            } else {
+                                img.signedUrl = img.url;
+                            }
+                        }
+                    }
+
+                    return imageObj;
                 })
             );
 
@@ -677,19 +716,9 @@ if (imageObj.images && imageObj.images.length > 0) {
         try {
             const categories = await this.imageRepository.getAllCategories();
 
-         
             if (!categories || categories.length === 0) {
                 return {
                     success: false,
-                    // data: [
-                    //     { name: 'Products', slug: 'products', count: 0 },
-                    //     { name: 'Categories', slug: 'categories', count: 0 },
-                    //     { name: 'Banners', slug: 'banners', count: 0 },
-                    //     { name: 'Users', slug: 'users', count: 0 },
-                    //     { name: 'Brands', slug: 'brands', count: 0 },
-                    //     { name: 'Reviews', slug: 'reviews', count: 0 },
-                    //     { name: 'General', slug: 'general', count: 0 }
-                    // ]
                     message: "No categories found"
                 };
             }

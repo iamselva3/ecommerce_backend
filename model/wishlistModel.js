@@ -23,7 +23,6 @@ const wishlistSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Ensure unique products in wishlist
 wishlistSchema.index({ user: 1, 'items.product': 1 }, { unique: true });
 
 const Wishlist = mongoose.model('Wishlist', wishlistSchema);
