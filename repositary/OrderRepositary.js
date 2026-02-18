@@ -28,13 +28,12 @@ class OrderRepository {
     }
 
     // Find order by orderId (public ID)
-    async findByOrderId(orderId, userId = null) {
+    async findByOrderId(id, userId = null) {
         try {
-            const query = { orderId };
+            const query = { _id: id };
             if (userId) {
                 query.user = userId;
             }
-
             return await Order.findOne(query)
                 .populate('user', 'name email phone')
                 .populate('items.productId', 'name url category')
@@ -43,7 +42,6 @@ class OrderRepository {
             throw error;
         }
     }
-
     // Find all orders for a user
     async findByUser(userId, options = {}) {
         try {
@@ -260,10 +258,10 @@ class OrderRepository {
     }
 
 
-    
+
 
     // Clear user's cart
-   
+
 }
 
 export default OrderRepository;
