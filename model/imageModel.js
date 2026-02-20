@@ -24,7 +24,7 @@ const imageSchema = new mongoose.Schema({
     sizes: {
         type: [String],
         required: true,
-        enum: ['s', 'm', 'l', 'xl', 'xxl'],
+        enum: ['xs', 's', 'm', 'l', 'xl', 'xxl', 'xxxl'],
     },
     price: {
         type: Number,
@@ -47,6 +47,12 @@ const imageSchema = new mongoose.Schema({
             't-shirts',
             'pants',
             'shoes',
+            'kurtis',
+            'salwar',
+            'jeans',
+            'skirts',
+            'sarees',
+            'gowns',
             'accessories',
             'categories',
             'banners',
@@ -58,7 +64,7 @@ const imageSchema = new mongoose.Schema({
         default: 'general'
     },
 
-       images: [{
+    images: [{
         url: {
             type: String,
             required: true
