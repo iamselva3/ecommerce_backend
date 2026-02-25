@@ -26,6 +26,10 @@ const imageSchema = new mongoose.Schema({
         required: true,
         enum: ['xs', 's', 'm', 'l', 'xl', 'xxl', 'xxxl'],
     },
+     Numsizes: {
+        type: [String],
+        required: true,
+    },
     price: {
         type: Number,
         required: true

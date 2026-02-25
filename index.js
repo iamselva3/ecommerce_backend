@@ -10,6 +10,7 @@ import reviewRoutes from './routes/reviewRoute.js';
 import wishlistRoutes from './routes/wishlistRoute.js';
 import AddressRoutes from './routes/AddressesRoute.js';
 import PaymentMethodRoutes from './routes/PaymentRoute.js';
+import PincodeRoutes from './routes/PincodeRoute.js';
 import cors from 'cors';
 
 
@@ -51,6 +52,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/addresses', AddressRoutes);
 app.use('/api/payment-methods', PaymentMethodRoutes);
+app.use('/api/pincode', PincodeRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

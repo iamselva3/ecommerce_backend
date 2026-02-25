@@ -7,9 +7,6 @@ class AddressController {
 
     addAddress = async (req, res) => {
         try {
-
-            console.log("✅ Controller hit!"); // Add this to confirm
-            console.log("User from token:", req.user);
             const userId = req.user.userId;
             const addressData = req.body;
 
