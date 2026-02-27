@@ -5,7 +5,6 @@ import { authMiddleware, adminMiddleware } from '../middlewares/authMiddleware.j
 const router = express.Router();
 const pincodeController = new PincodeController();
 
-// Public routes
 router.get('/check/:pincode', pincodeController.checkPincode);
 router.get('/location', pincodeController.checkByCoordinates);
 
@@ -17,5 +16,6 @@ router.get('/admin/all', pincodeController.getAllPincodes);
 router.post('/admin/add', pincodeController.addPincode);
 router.put('/admin/:pincode/deliverability', pincodeController.updateDeliverability);
 router.post('/admin/bulk-upload', pincodeController.bulkUploadPincodes);
+router.put('/admin/:pincode', pincodeController.updatePincode);
 
 export default router;

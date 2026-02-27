@@ -50,7 +50,13 @@ class CartUseCase {
     }
 
     async clearCart(userId) {
-        return this.cartRepository.deleteByUserId(userId);
+        try {
+            const updatedCart = await this.cartRepository.clearCart(userId);
+            return updatedCart;
+        } catch (error) {
+            console.error('Error in clearCart:', error);
+            throw error;
+        }
     }
 
     async getCartCount(userId) {

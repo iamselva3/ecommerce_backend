@@ -8,7 +8,7 @@ class PincodeController {
     checkPincode = async (req, res) => {
         try {
             const { pincode } = req.params;
-            
+
 
             const result = await this.pincodeUseCase.checkPincode(pincode);
 
@@ -60,6 +60,75 @@ class PincodeController {
         }
     };
 
+    updateDeliverability = async (req, res) => {
+        try {
+            const { pincode } = req.params;
+            const { isDeliverable } = req.body;
+            const userId = req.user._id;
+
+            const result = await this.pincodeUseCase.updateDeliverability(pincode, isDeliverable, userId);
+
+            if (result.success) {
+                return res.status(200).json({
+                    success: true,
+                    message: result.message,
+                    data: result.data
+                });
+            } else {
+                return res.status(404).json({
+                    success: false,
+                    message: result.error
+                });
+            }
+        } catch (error) {
+            console.error('Update deliverability error:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Server error',
+                error: error.message
+            });
+        }
+    };
+
+
+    // Add this new method
+    updatePincode = async (req, res) => {
+        try {
+            const { pincode } = req.params;
+            const updateData = req.body;
+            const userId = req.user._id;
+
+            // Remove fields that shouldn't be updated directly
+            delete updateData._id;
+            delete updateData.createdAt;
+            delete updateData.updatedAt;
+            delete updateData.__v;
+
+            const result = await this.pincodeUseCase.updatePincode(pincode, updateData, userId);
+
+            if (result.success) {
+                return res.status(200).json({
+                    success: true,
+                    message: result.message,
+                    data: result.data
+                });
+            } else {
+                return res.status(404).json({
+                    success: false,
+                    message: result.error
+                });
+            }
+        } catch (error) {
+            console.error('Update pincode error:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Server error',
+                error: error.message
+            });
+        }
+    };
+
+    // Keep the existing updateDeliverability for quick toggle
     updateDeliverability = async (req, res) => {
         try {
             const { pincode } = req.params;

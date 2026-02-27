@@ -57,9 +57,22 @@ class PincodeRepository {
         }
     }
 
+    async update(pincode, updateData) {
+        try {
+            updateData.lastUpdated = Date.now();
+            return await Pincode.findOneAndUpdate(
+                { pincode },
+                updateData,
+                { new: true, runValidators: true }
+            );
+        } catch (error) {
+            throw new Error(`Error updating pincode: ${error.message}`);
+        }
+    }
+
     async getAllDeliverablePincodes(page = 1, limit = null) {
         try {
-            const query = { isDeliverable: true };
+            const query = {};
             let pincodes;
             let total;
 
@@ -72,7 +85,7 @@ class PincodeRepository {
                     .sort({ pincode: 1 });
                 total = await Pincode.countDocuments(query);
             } else {
-                // Without pagination - get all
+                
                 pincodes = await Pincode.find(query).sort({ pincode: 1 });
                 total = pincodes.length;
             }

@@ -33,10 +33,16 @@ class CartController {
     }
 
     async clearCart(req, res) {
-        await cartUseCase.clearCart(req.user.userId);
-        res.json({ success: true });
+        const updatedCart = await cartUseCase.clearCart(req.user.userId);
+       
+
+        
+        res.json({
+            success: true,
+            data: updatedCart || { items: [] }
+        });
     }
-    
+
     async getCartCount(req, res) {
         const userId = req.user.userId;
         const count = await cartUseCase.getCartCount(userId);

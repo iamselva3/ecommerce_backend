@@ -11,7 +11,7 @@ const cartItemSchema = new mongoose.Schema({
     sizes: {
         type: [String],
         required: true,
-        enum: ['s', 'm', 'l', 'xl', 'xxl'],
+        enum: ['xs', 's', 'm', 'l', 'xl', 'xxl', 'xxxl'],
     },
     image: String,
     qty: {

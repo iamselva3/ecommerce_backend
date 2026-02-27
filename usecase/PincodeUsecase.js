@@ -166,6 +166,39 @@ class PincodeUseCase {
         }
     }
 
+    async updatePincode(pincode, updateData, userId) {
+    try {
+        // Validate required fields
+        if (updateData.pincode && updateData.pincode.length !== 6) {
+            return {
+                success: false,
+                error: 'Pincode must be 6 digits'
+            };
+        }
+
+        const updated = await this.pincodeRepository.update(pincode, {
+            ...updateData,
+            updatedBy: userId
+        });
+
+        if (!updated) {
+            return {
+                success: false,
+                error: 'Pincode not found'
+            };
+        }
+
+        return {
+            success: true,
+            message: 'Pincode updated successfully',
+            data: updated
+        };
+    } catch (error) {
+        throw new Error(`Error updating pincode: ${error.message}`);
+    }
+}
+
+
     async addPincode(pincodeData, userId) {
         try {
             // Check if already exists
