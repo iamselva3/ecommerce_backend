@@ -58,6 +58,7 @@ class PincodeUseCase {
 
     // Check via coordinates (latitude, longitude)
     async checkByCoordinates(lat, lng) {
+        console.log("sduusd================",lat,lng)
         try {
             if (!lat || !lng) {
                 return {
@@ -83,25 +84,61 @@ class PincodeUseCase {
         }
     }
 
+
+    // async reverseGeocode(lat, lng) {
+    //     try {
+    //         const response = await axios.get(
+    //             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+    //             {
+    //                 headers: {
+    //                     'User-Agent': 'YourAppName/1.0'
+    //                 }
+    //             }
+    //         );
+
+    //         if (response.data && response.data.address) {
+    //             const address = response.data.address;
+    //             return address.postcode || null;
+    //         }
+    //         return null;
+    //     } catch (error) {
+    //         console.error('Reverse geocoding error:', error);
+    //         return null;
+    //     }
+    // }
+
     // Reverse geocoding using OpenStreetMap/Nominatim (free)
     async reverseGeocode(lat, lng) {
         try {
+            // Mappls API call
             const response = await axios.get(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+                `https://search.mappls.com/search/address/rev-geocode`,
                 {
-                    headers: {
-                        'User-Agent': 'YourAppName/1.0'
-                    }
+                    params: {
+                        lat: lat,
+                        lng: lng,
+                        region: "IND",
+                        lang: "en",
+                        access_token: process.env.MAPPLS_ACCESS_TOKEN,
+                    },
                 }
             );
 
-            if (response.data && response.data.address) {
-                const address = response.data.address;
-                return address.postcode || null;
+            // Check if response has results
+            if (
+                response.data &&
+                response.data.results &&
+                response.data.results.length > 0
+            ) {
+                // Extract pincode from the first result
+                const pincode = response.data.results[0].pincode;
+                console.log("Pincode from Mappls:", pincode);
+                return pincode || null;
             }
+            
             return null;
         } catch (error) {
-            console.error('Reverse geocoding error:', error);
+            console.error('Mappls reverse geocoding error:', error);
             return null;
         }
     }
