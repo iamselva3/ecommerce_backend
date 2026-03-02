@@ -81,6 +81,11 @@ const orderSchema = new mongoose.Schema({
             default: '',
         },
     },
+    deliveryInfo: {
+        estimatedDays: Number,
+        estimatedDate: Date,
+        codAvailable: Boolean
+    },
     paymentDetails: {
         method: {
             type: String,
@@ -89,7 +94,7 @@ const orderSchema = new mongoose.Schema({
         },
         status: {
             type: String,
-            enum: ['pending','shipped', 'completed', 'failed', 'refunded'],
+            enum: ['pending', 'shipped', 'completed', 'failed', 'refunded'],
             default: 'pending',
         },
         transactionId: {

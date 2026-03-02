@@ -9,6 +9,7 @@ class OrderUsecase {
 
     // Create new order
     async createOrder(userId, orderData) {
+        console.log("sddsjkjsdk",orderData.deliveryInfo.estimatedDate)
         try {
             // Validate order data
             if (!orderData.items || orderData.items.length === 0) {
@@ -39,7 +40,7 @@ class OrderUsecase {
             // Create order object
             const order = {
                 user: userId,
-                 orderId: generateOrderId(), 
+                orderId: generateOrderId(),
                 items: orderData.items.map(item => ({
                     productId: item.productId,
                     name: item.name,
@@ -59,6 +60,11 @@ class OrderUsecase {
                     pincode: orderData.shippingAddress.pincode,
                     country: orderData.shippingAddress.country || 'India',
                     landmark: orderData.shippingAddress.landmark || '',
+                },
+                deliveryInfo: {
+                    estimatedDays: orderData?.deliveryInfo?.estimatedDays || 3,
+                    estimatedDate: orderData?.deliveryInfo?.estimatedDate || new Date(),
+                    codAvailable: orderData?.deliveryInfo?.codAvailable || true
                 },
                 paymentDetails: {
                     method: orderData.paymentMethod || 'cod',
