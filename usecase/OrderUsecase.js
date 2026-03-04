@@ -9,7 +9,6 @@ class OrderUsecase {
 
     // Create new order
     async createOrder(userId, orderData) {
-        console.log("sddsjkjsdk",orderData.deliveryInfo.estimatedDate)
         try {
             // Validate order data
             if (!orderData.items || orderData.items.length === 0) {

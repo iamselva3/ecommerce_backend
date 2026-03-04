@@ -13,6 +13,7 @@ import PaymentMethodRoutes from './routes/PaymentRoute.js';
 import PincodeRoutes from './routes/PincodeRoute.js';
 import authRoutes from './routes/authRouts.js';
 import cors from 'cors';
+import AiRoutes from './routes/AiRoutes.js';
 
 
 dotenv.config();
@@ -54,7 +55,8 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/addresses', AddressRoutes);
 app.use('/api/payment-methods', PaymentMethodRoutes);
 app.use('/api/pincode', PincodeRoutes);
-app.use('/api/auth', authRoutes)
+app.use('/api/auth', authRoutes);
+app.use('/api/ai', AiRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
