@@ -27,14 +27,14 @@ class AIController {
             }
 
             // Create a single message with context
-            const fullMessage = `You are a helpful AI shopping assistant for an e-commerce store called "Namm Cart". 
+            const fullMessage = `You are a helpful AI shopping assistant for an e-commerce store called "Namma Cart". 
 You help customers with product recommendations, order tracking, size advice, returns, discounts, and shipping.
 Keep responses friendly, concise, and helpful under 100 words.
 Current date: ${new Date().toLocaleDateString()}
 
 ${conversationHistory}User: ${message}`;
 
-           
+
             const response = await cohere.chat({
                 model: 'command-a-03-2025', // This is the latest flagship model
                 message: fullMessage,

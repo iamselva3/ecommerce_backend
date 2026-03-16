@@ -15,5 +15,5 @@ router.get('/:id', addressController.getAddressById);
 router.put('/:id', addressController.updateAddress);
 router.delete('/:id', addressController.deleteAddress);
 router.patch('/:id/default', addressController.setDefaultAddress);
-
+    
 export default router;

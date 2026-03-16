@@ -38,7 +38,8 @@ const userSchema = new mongoose.Schema({
         city: String,
         state: String,
         country: String,
-        zipCode: String
+        zipCode: String,
+        pincode: String
     },
     isActive: {
         type: Boolean,

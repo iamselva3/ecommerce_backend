@@ -9,8 +9,6 @@ export const connectDB = async () => {
     }
 
     try {
-        // 🔮 MAGIC FIX: Force Node.js to use Google DNS for resolution
-        // This often bypasses local network blocks on "querySrv"
         try {
             dns.setServers(['8.8.8.8', '8.8.4.4']);
             console.log("📡 Set DNS to Google (8.8.8.8) to bypass local block");
