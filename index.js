@@ -44,6 +44,7 @@ connectDB();
 // Basic route
 app.get('/', (req, res) => {
     res.send('Server is running with MongoDB');
+    console.log("Server is running with MongoDB")
 });
 
 app.use('/api/users', userRoutes);
