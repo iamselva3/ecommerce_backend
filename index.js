@@ -13,6 +13,7 @@ import PaymentMethodRoutes from './routes/PaymentRoute.js';
 import PincodeRoutes from './routes/PincodeRoute.js';
 import authRoutes from './routes/authRouts.js';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import AiRoutes from './routes/AiRoutes.js';
 
 
@@ -20,22 +21,14 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-// app.use(cors());
-
-
-// app.use(
-//     cors({
-//         origin: process.env.FRONTEND_URL,
-//         credentials: true,
-//         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//         allowedHeaders: ["Content-Type", "Authorization"],
-//     })
-// );
+app.use(cookieParser());
 
 app.use(
     cors({
-        origin: true,
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
         credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
     })
 );
 

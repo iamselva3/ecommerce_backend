@@ -28,9 +28,13 @@ class CartUseCase {
 
     async updateQty(userId, productId, qty) {
         const cart = await this.cartRepository.findByUserId(userId);
+        if (!cart) throw new Error("Cart not found");
+
         const item = cart.items.find(
-            (i) => i.productId.toString() === productId
+            (i) => i.productId.toString() === productId?.toString()
         );
+
+        if (!item) throw new Error("Item not found in cart");
 
         item.qty = qty;
         return this.cartRepository.save(cart);

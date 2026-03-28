@@ -17,13 +17,17 @@ class CartController {
     }
 
     async updateQty(req, res) {
-        const { productId, qty } = req.body;
-        const cart = await cartUseCase.updateQty(
-            req.user.userId,
-            productId,
-            qty
-        );
-        res.json(cart);
+        try {
+            const { productId, qty } = req.body;
+            const cart = await cartUseCase.updateQty(
+                req.user.userId,
+                productId,
+                qty
+            );
+            res.json(cart);
+        } catch (error) {
+            res.status(400).json({ success: false, message: error.message });
+        }
     }
 
     async removeItem(req, res) {

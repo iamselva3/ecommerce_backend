@@ -42,7 +42,7 @@ class WishlistController {
     addToWishlist = async (req, res) => {
         try {
             const userId = req.user.id || req.user.userId;
-            const { productId } = req.params;
+            const productId = req.params.productId || req.body.productId;
 
             const wishlist = await this.wishlistUsecase.addToWishlist(userId, productId);
 

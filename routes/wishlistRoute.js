@@ -9,6 +9,7 @@ const wishlistController = new WishlistController();
 router.use(authMiddleware);
 
 router.get('/', wishlistController.getWishlist);
+router.post('/', wishlistController.addToWishlist);
 router.post('/:productId', wishlistController.addToWishlist);
 router.delete('/:productId', wishlistController.removeFromWishlist);
 router.get('/check/:productId', wishlistController.checkWishlistStatus);

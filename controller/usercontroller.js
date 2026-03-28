@@ -36,24 +36,46 @@ class UserController {
             const result = await this.userUsecase.loginUser(email, password);
 
             if (result.success) {
+                const { token, user } = result.data;
+
+                // Set JWT as HttpOnly cookie
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
+                    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                });
+
                 res.status(200).json({
                     success: true,
                     message: 'Login successful',
-                    data: result.data
+                    data: { user },
                 });
             } else {
                 res.status(401).json({
                     success: false,
-                    message: result.error
+                    message: result.error,
                 });
             }
         } catch (error) {
             res.status(500).json({
                 success: false,
                 message: 'Server error',
-                error: error.message
+                error: error.message,
             });
         }
+    };
+
+    logout = async (req, res) => {
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+        });
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully',
+        });
     };
 
     getProfile = async (req, res) => {

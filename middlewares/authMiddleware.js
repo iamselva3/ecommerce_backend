@@ -2,7 +2,10 @@ import jwt from 'jsonwebtoken';
 
 export const authMiddleware = (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        // Read token from HttpOnly cookie first, fall back to Authorization header
+        const token =
+            req.cookies?.token ||
+            req.header('Authorization')?.replace('Bearer ', '');
 
         if (!token) {
             return res.status(401).json({
