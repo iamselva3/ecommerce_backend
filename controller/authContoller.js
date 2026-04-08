@@ -3,7 +3,7 @@ import AuthUseCase from '../usecase/authUsecase.js';
 const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
 
@@ -16,7 +16,7 @@ class AuthController {
     googleLogin = async (req, res) => {
         try {
             const { token } = req.body;
-            
+
             if (!token) {
                 return res.status(400).json({
                     success: false,
@@ -48,7 +48,7 @@ class AuthController {
     appleLogin = async (req, res) => {
         try {
             const { code, id_token, user } = req.body;
-            
+
             if (!id_token) {
                 return res.status(400).json({
                     success: false,
@@ -80,7 +80,7 @@ class AuthController {
     emailLogin = async (req, res) => {
         try {
             const { email, password } = req.body;
-            
+
             if (!email || !password) {
                 return res.status(400).json({
                     success: false,
