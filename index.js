@@ -20,7 +20,6 @@ import AiRoutes from './routes/AiRoutes.js';
 dotenv.config();
 
 const app = express();
-app.set('trust proxy', 1);
 app.use(express.json());
 app.use(cookieParser());
 const allowedOrigins = [
@@ -31,9 +30,21 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin) return callback(null, true);
+        
+        // Remove trailing slash for comparison if present
+        const cleanOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+        
+        const isAllowed = 
+            allowedOrigins.includes(cleanOrigin) ||
+            allowedOrigins.includes(cleanOrigin + '/') ||
+            cleanOrigin.includes('localhost') ||
+            cleanOrigin.includes('vercel.app');
+
+        if (isAllowed) {
             callback(null, true);
         } else {
+            console.error('CORS blocked for origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
