@@ -41,8 +41,9 @@ class UserController {
                 // Set JWT as HttpOnly cookie
                 res.cookie('token', token, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',  // true on Vercel
-                    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+                    // Hardcoded 'true' and 'none' so that cross-origin cookies work perfectly even if Render NODE_ENV is missing
+                    secure: true,
+                    sameSite: 'none',
                     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
                 });
 
@@ -69,8 +70,8 @@ class UserController {
     logout = async (req, res) => {
         res.clearCookie('token', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+            secure: true,
+            sameSite: 'none',
         });
         res.status(200).json({
             success: true,
