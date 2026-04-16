@@ -67,8 +67,9 @@ class OrderUsecase {
                 },
                 paymentDetails: {
                     method: orderData.paymentMethod || 'cod',
-                    status: orderData.paymentMethod === 'cod' ? 'pending' : 'completed',
+                    status: orderData.paymentStatus || (orderData.paymentMethod === 'cod' ? 'pending' : 'completed'),
                 },
+                paymentStatus: orderData.paymentStatus === 'completed' ? 'paid' : (orderData.paymentStatus === 'failed' ? 'failed' : 'pending'),
                 subtotal,
                 gst,
                 deliveryCharge,

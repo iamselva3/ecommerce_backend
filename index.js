@@ -58,6 +58,8 @@ app.use('/api/payment-methods', PaymentMethodRoutes);
 app.use('/api/pincode', PincodeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', AiRoutes);
+import paymentGatewayRoutes from './routes/PaymentRoutes.js';
+app.use('/api/payment', paymentGatewayRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
