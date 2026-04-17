@@ -31,11 +31,11 @@ const allowedOrigins = [
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
-        
+
         // Remove trailing slash for comparison if present
         const cleanOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
-        
-        const isAllowed = 
+
+        const isAllowed =
             allowedOrigins.includes(cleanOrigin) ||
             allowedOrigins.includes(cleanOrigin + '/') ||
             cleanOrigin.includes('localhost') ||

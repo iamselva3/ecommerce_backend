@@ -68,6 +68,8 @@ class OrderUsecase {
                 paymentDetails: {
                     method: orderData.paymentMethod || 'cod',
                     status: orderData.paymentStatus || (orderData.paymentMethod === 'cod' ? 'pending' : 'completed'),
+                    transactionId: orderData.transactionId || null,
+                    paidAmount: orderData.paidAmount || (orderData.paymentStatus === 'completed' || orderData.paymentStatus === 'paid' ? totalAmount : 0)
                 },
                 paymentStatus: orderData.paymentStatus === 'completed' ? 'paid' : (orderData.paymentStatus === 'failed' ? 'failed' : 'pending'),
                 subtotal,

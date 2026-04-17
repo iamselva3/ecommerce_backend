@@ -21,6 +21,37 @@ router.get(
     orderController.getUserOrders
 );
 
+// Get all orders (admin)
+router.get(
+    '/admin',
+    authMiddleware,
+    adminMiddleware,
+    orderController.getAllOrders
+);
+
+// Get all orders
+router.get(
+    '/',
+    authMiddleware,
+    adminMiddleware,
+    orderController.getAllOrders
+);
+
+// Get order statistics
+router.get(
+    '/stats/orders',
+    authMiddleware,
+    orderController.getOrderStats
+);
+
+// Get recent orders (admin dashboard)
+router.get(
+    '/recent/orders',
+    authMiddleware,
+    adminMiddleware,
+    orderController.getRecentOrders
+);
+
 // Get specific order
 router.get(
     '/:orderId',
@@ -33,15 +64,6 @@ router.post(
     '/:orderId/cancel',
     authMiddleware,
     orderController.cancelOrder
-);
-
-
-// Get all orders
-router.get(
-    '/',
-    authMiddleware,
-    adminMiddleware,
-    orderController.getAllOrders
 );
 
 // Update order status
@@ -66,21 +88,6 @@ router.put(
     authMiddleware,
     adminMiddleware,
     orderController.updatePaymentStatus
-);
-
-// Get order statistics
-router.get(
-    '/stats/orders',
-    authMiddleware,
-    orderController.getOrderStats
-);
-
-// Get recent orders (admin dashboard)
-router.get(
-    '/recent/orders',
-    authMiddleware,
-    adminMiddleware,
-    orderController.getRecentOrders
 );
 
 
